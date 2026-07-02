@@ -76,3 +76,5 @@ OK tools=inspect_video,get_transcript,get_timeline,get_frame_at,summarize_video,
 Install or point to `yt-dlp`, then call `inspect_video` with a YouTube URL. After that, add Whisper only if a target video has no captions.
 
 For the bigger direction, see [VISION.md](./VISION.md).
+
+For the product-building path from problem to app, see [VIBE_CODING_GUIDE.md](./VIBE_CODING_GUIDE.md).

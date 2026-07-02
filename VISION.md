@@ -67,7 +67,7 @@ Purpose: handle tutorials, demos, UI walkthroughs, repair clips, cooking, design
 
 - create `session_id`
 - keep video metadata, timeline, transcript, and keyframe references together
-- allow follow-up prompts like "นาที 12:40 เขาทำอะไร"
+- allow follow-up prompts like "what happens at 12:40?"
 - let the AI cite timestamps back to the user
 
 Purpose: make the video feel like shared working context between the user and the AI.
