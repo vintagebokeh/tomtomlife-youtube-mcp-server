@@ -1,0 +1,18 @@
+{
+  "name": "tomtomlife-youtube-mcp-server",
+  "version": "0.1.0",
+  "description": "Temporary-cache YouTube context bridge for MCP clients.",
+  "type": "module",
+  "bin": {
+    "tomtomlife-youtube-mcp-server": "./src/server.js"
+  },
+  "scripts": {
+    "start": "node ./src/server.js",
+    "smoke": "node ./examples/smoke-tools-list.js",
+    "selftest": "node ./src/selftest.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
