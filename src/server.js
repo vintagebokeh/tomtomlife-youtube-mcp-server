@@ -66,6 +66,16 @@ const tools = [
       includeKeyframes: booleanSchema("Extract keyframes every X seconds", false),
       frameStepSeconds: numberSchema("Spacing for keyframes when includeKeyframes is true", defaultFrameStepSeconds)
     }, ["url"])
+  },
+  {
+    name: "create_agent_brief",
+    description: "Package video context into a compact brief for ChatGPT, Codex, n8n, or another AI agent.",
+    inputSchema: objectSchema({
+      url: stringSchema("YouTube URL"),
+      goal: stringSchema("What the agent should learn or produce from the video", "understand the useful ideas and steps"),
+      language: stringSchema("Preferred caption language", "auto"),
+      maxEvidenceItems: numberSchema("Maximum timestamped evidence items", 10)
+    }, ["url"])
   }
 ];
 
@@ -444,6 +454,75 @@ async function createChatContext({ url, language = "auto", includeKeyframes = fa
   return context;
 }
 
+async function createAgentBrief({ url, goal = "understand the useful ideas and steps", language = "auto", maxEvidenceItems = 10 }) {
+  const timeline = await getTimeline({ url, language });
+  const summary = await summarizeVideo({ url, language, maxItems: maxEvidenceItems });
+  const evidence = selectEvidenceItems(timeline, maxEvidenceItems);
+  const brief = {
+    brief_type: "youtube_context_bridge_agent_brief",
+    created_at: new Date().toISOString(),
+    goal,
+    metadata: timeline.metadata,
+    context_available: {
+      metadata: true,
+      chapters: timeline.chapters.length > 0,
+      transcript_chunks: timeline.transcript_chunks.length,
+      visual_frames: "available through get_frame_at(url, timestamp)"
+    },
+    how_to_use: [
+      "Use metadata to decide whether the video matches the goal.",
+      "Use chapters and evidence timestamps to ground claims.",
+      "Call get_frame_at for visual or silent-demo moments.",
+      "Ask follow-up questions against timestamps instead of guessing.",
+      "For n8n, pass this brief as the compact payload and fetch deeper context only when needed."
+    ],
+    summary: summary.summary,
+    timestamped_evidence: evidence,
+    suggested_agent_tasks: [
+      "Extract concrete steps or workflow actions.",
+      "Identify tools, APIs, screens, and decisions shown in the video.",
+      "Mark which timestamps deserve visual inspection.",
+      "Generate use cases or project ideas that fit the user's goal.",
+      "List missing context that needs another source or another video."
+    ],
+    cache_policy: {
+      permanent_video_downloads: false,
+      cached_artifacts: ["metadata", "transcript", "timeline", "selected keyframes", "brief"],
+      temporary_audio_deleted_after_transcription: true
+    }
+  };
+  await writeJson(cachePath(url, "agent-brief.json"), brief);
+  return brief;
+}
+
+function selectEvidenceItems(timeline, maxItems) {
+  const items = [];
+  for (const chapter of timeline.chapters) {
+    items.push({
+      type: "chapter",
+      timestamp: chapter.timestamp,
+      start: chapter.start,
+      end: chapter.end,
+      text: chapter.title
+    });
+    if (items.length >= maxItems) return items;
+  }
+
+  const chunks = timeline.transcript_chunks || [];
+  const stride = Math.max(1, Math.ceil(chunks.length / Math.max(1, maxItems - items.length)));
+  for (let i = 0; i < chunks.length && items.length < maxItems; i += stride) {
+    const chunk = chunks[i];
+    items.push({
+      type: "transcript",
+      timestamp: chunk.timestamp,
+      start: chunk.start,
+      end: chunk.end,
+      text: truncate(chunk.text, 240)
+    });
+  }
+  return items;
+}
+
 function truncate(text, max) {
   if (text.length <= max) return text;
   return `${text.slice(0, max - 1).trim()}...`;
@@ -480,6 +559,8 @@ async function callTool(name, args) {
       return summarizeVideo(args);
     case "create_chat_context":
       return createChatContext(args);
+    case "create_agent_brief":
+      return createAgentBrief(args);
     default:
       throw new Error(`Unknown tool: ${name}`);
   }

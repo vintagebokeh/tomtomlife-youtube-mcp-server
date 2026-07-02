@@ -26,7 +26,7 @@ setTimeout(() => {
   child.kill();
   const lines = out.trim().split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
   const toolNames = lines.at(-1)?.result?.tools?.map((tool) => tool.name) || [];
-  const expected = ["inspect_video", "get_transcript", "get_timeline", "get_frame_at", "summarize_video", "create_chat_context"];
+  const expected = ["inspect_video", "get_transcript", "get_timeline", "get_frame_at", "summarize_video", "create_chat_context", "create_agent_brief"];
   const missing = expected.filter((name) => !toolNames.includes(name));
   if (missing.length) {
     console.error(`Missing tools: ${missing.join(", ")}`);

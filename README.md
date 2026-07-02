@@ -20,6 +20,7 @@ Temporary audio used for fallback transcription is deleted after the transcripti
 - `get_frame_at(url, timestamp)` - one thumbnail image at a timestamp
 - `summarize_video(url)` - local extractive timeline summary
 - `create_chat_context(url)` - returns `session_id` for timestamp-aware chat
+- `create_agent_brief(url, goal)` - compact payload for ChatGPT, Codex, n8n, or another agent
 
 ## Requirements
 
@@ -68,7 +69,7 @@ node .\src\selftest.js
 Expected output:
 
 ```text
-OK tools=inspect_video,get_transcript,get_timeline,get_frame_at,summarize_video,create_chat_context
+OK tools=inspect_video,get_transcript,get_timeline,get_frame_at,summarize_video,create_chat_context,create_agent_brief
 ```
 
 ## Next Practical Step
@@ -78,3 +79,5 @@ Install or point to `yt-dlp`, then call `inspect_video` with a YouTube URL. Afte
 For the bigger direction, see [VISION.md](./VISION.md).
 
 For the product-building path from problem to app, see [VIBE_CODING_GUIDE.md](./VIBE_CODING_GUIDE.md).
+
+For a plain-language explanation of how the bridge works, see [HOW_IT_WORKS.md](./HOW_IT_WORKS.md).
