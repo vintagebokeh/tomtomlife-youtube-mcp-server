@@ -1,0 +1,16 @@
+.venv/
+downloads/
+*.part
+*.ytdl
+*.mp4
+*.mkv
+*.webm
+*.mp3
+*.wav
+.env
+.env.*
+!.env.example
+__pycache__/
+*.log
+*.cookies.txt
+cookies.txt
